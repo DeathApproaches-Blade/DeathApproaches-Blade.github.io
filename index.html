@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>学习资料平台</title>
+    <style>
+        .nav-bar { /* 导航栏样式 */
+            display: flex;
+            padding: 1rem;
+            background: #f0f0f0;
+        }
+        .tab-btn {
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+        }
+        #content-container {
+            padding: 2rem;
+        }
+        .discussion-list { /* 讨论列表样式 */
+            display: grid;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="tab-btn" data-tab="study">学习</div>
+        <div class="tab-btn" data-tab="material">资料</div>
+        <div class="tab-btn" data-tab="entertainment">娱乐</div>
+    </nav>
+
+    <div id="content-container">
+        <!-- 学习板块初始内容 -->
+        <div id="study-tab" class="tab-content">
+            <h2>最新讨论</h2>
+            <div class="discussion-list" id="discussions">
+                <!-- 动态加载讨论列表 -->
+            </div>
+        </div>
+        <!-- 其他板块内容... -->
+    </div>
+
+    <script>
+        // 动态加载讨论文件
+        async function loadDiscussions() {
+            try {
+                const response = await fetch('/discuss');
+                const files = await response.json();
+                
+                files.forEach(file => {
+                    const discussionItem = document.createElement('div');
+                    discussionItem.innerHTML = `
+                        <h3>${file.name.replace('.tmd', '')}</h3>
+                        <div class="content" data-file="${file.name}"></div>
+                    `;
+                    discussionItem.querySelector('h3').onclick = () => 
+                        loadDiscussionContent(file.name);
+                    document.getElementById('discussions').appendChild(discussionItem);
+                });
+            } catch (error) {
+                console.error('加载讨论列表失败:', error);
+            }
+        }
+
+        async function loadDiscussionContent(filename) {
+            try {
+                const response = await fetch(`/discuss/${filename}`);
+                const content = await response.text();
+                // 此处需要添加Markdown解析逻辑
+                document.querySelector(`[data-file="${filename}"]`).innerHTML = content;
+            } catch (error) {
+                console.error('加载讨论内容失败:', error);
+            }
+        }
+
+        // 初始化加载
+        loadDiscussions();
+    </script>
+</body>
+</html>
